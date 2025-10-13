@@ -2,26 +2,44 @@ const express = require("express");
 const { graphqlHTTP } = require("express-graphql");
 const mongoose = require("mongoose");
 const schema = require("./schema");
+const { verifyToken } = require("./token");
 
 const app = express();
-const PORT = 4000;
+const port = 4000;
+const mongoPort = 27017;
 
-mongoose.connect("mongodb://localhost:27017/graphql", {
+mongoose.connect(`mongodb://localhost:${mongoPort}/graphql`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
 mongoose.connection.once("open", () =>
   console.log("Connected to MongoDB")
 );
 
 app.use(
   "/graphql",
-  graphqlHTTP({
-    schema,
-    graphiql: true,
+  graphqlHTTP((req) => {
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    let user = null;
+
+    if (token) {
+      try {
+        user = verifyToken(token);
+      } catch (err) {
+        throw new Error(err.message);
+      }
+    }
+
+    return {
+      schema,
+      graphiql: true,
+      context: { user },
+    };
   })
 );
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/graphql`);
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/graphql`);
 });
