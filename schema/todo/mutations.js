@@ -6,6 +6,7 @@ const {
 
 const TodoType = require("./type");
 const Todo = require("../../models/todo");
+const requireAuth = require("../../utils/auth");
 
 module.exports = {
   createTodo: {
@@ -15,14 +16,10 @@ module.exports = {
       title: { type: new GraphQLNonNull(GraphQLString) },
       description: { type: GraphQLString },
     },
-    resolve(_, args, context) {
-      if (!context.user) {
-        throw new Error("Not authenticated");
-      }
-
+    resolve: requireAuth((_, args) => {
       const todo = new Todo(args);
       return todo.save();
-    },
+    }),
   },
   updateTodo: {
     type: TodoType,
@@ -31,21 +28,21 @@ module.exports = {
       title: { type: GraphQLString },
       description: { type: GraphQLString },
     },
-    resolve(_, args) {
+    resolve: requireAuth((_, args) => {
       return Todo.findByIdAndUpdate(
         args.id,
         { $set: args },
         { new: true }
       );
-    },
+    }),
   },
   deleteTodo: {
     type: TodoType,
     args: {
       id: { type: new GraphQLNonNull(GraphQLID) },
     },
-    resolve(_, args) {
+    resolve: requireAuth((_, args) => {
       return Todo.findByIdAndDelete(args.id);
-    },
+    }),
   },
 };

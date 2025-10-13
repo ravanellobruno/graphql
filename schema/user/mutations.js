@@ -11,7 +11,7 @@ const SALT_ROUNDS = 10;
 const UserType = require("./type");
 const User = require("../../models/user");
 const AuthType = require("../auth/type.js");
-const { generateToken } = require("../../token.js");
+const { generateToken } = require("../../utils/token.js");
 
 module.exports = {
   createUser: {
