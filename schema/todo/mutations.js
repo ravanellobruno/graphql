@@ -12,12 +12,16 @@ module.exports = {
   createTodo: {
     type: TodoType,
     args: {
-      userId: { type: new GraphQLNonNull(GraphQLID) },
       title: { type: new GraphQLNonNull(GraphQLString) },
       description: { type: GraphQLString },
     },
-    resolve: requireAuth((_, args) => {
-      const todo = new Todo(args);
+    resolve: requireAuth(async (_, args, { user }) => {
+      const todo = new Todo({
+        userId: user.id,
+        title: args.title,
+        description: args.description,
+      });
+
       return todo.save();
     }),
   },
@@ -28,7 +32,15 @@ module.exports = {
       title: { type: GraphQLString },
       description: { type: GraphQLString },
     },
-    resolve: requireAuth((_, args) => {
+    resolve: requireAuth(async (_, args, { user }) => {
+      const todo = await Todo.findById(args.id);
+      
+      if (!todo) throw new Error("Todo not found");
+
+      if (todo.userId.toString() !== user.id) {
+        throw new Error("Not authorized to update this todo");
+      }
+
       return Todo.findByIdAndUpdate(
         args.id,
         { $set: args },
@@ -41,7 +53,15 @@ module.exports = {
     args: {
       id: { type: new GraphQLNonNull(GraphQLID) },
     },
-    resolve: requireAuth((_, args) => {
+    resolve: requireAuth(async (_, args, { user }) => {
+      const todo = await Todo.findById(args.id);
+      
+      if (!todo) throw new Error("Todo not found");
+
+      if (todo.userId.toString() !== user.id) {
+        throw new Error("Not authorized to delete this todo");
+      }
+
       return Todo.findByIdAndDelete(args.id);
     }),
   },

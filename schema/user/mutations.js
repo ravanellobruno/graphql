@@ -45,6 +45,10 @@ module.exports = {
       password: { type: GraphQLString },
     },
     async resolve(_, args) {
+      const user = await User.findById(args.id);
+
+      if (!user) throw new Error("User not found");
+
       if (args.password) {
         args.password = await bcrypt.hash(args.password, SALT_ROUNDS);
       }
@@ -57,7 +61,11 @@ module.exports = {
     args: {
       id: { type: new GraphQLNonNull(GraphQLID) },
     },
-    resolve(_, args) {
+    async resolve(_, args) {
+      const user = await User.findById(args.id);
+
+      if (!user) throw new Error("User not found");
+
       return User.findByIdAndDelete(args.id);
     },
   },
