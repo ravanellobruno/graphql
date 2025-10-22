@@ -2,8 +2,11 @@ const {
   GraphQLObjectType,
   GraphQLString,
   GraphQLInt,
-  GraphQLID
+  GraphQLID,
+  GraphQLList
 } = require("graphql");
+const TodoType = require("../todo/type");
+const Todo = require("../../models/todo");
 
 const UserType = new GraphQLObjectType({
   name: "User",
@@ -13,6 +16,12 @@ const UserType = new GraphQLObjectType({
     email: { type: GraphQLString },
     age: { type: GraphQLInt },
     password: { type: GraphQLString },
+    todos: {
+      type: new GraphQLList(TodoType),
+      resolve(user) {
+        return Todo.find({ userId: user.id });
+      },
+    },
   }),
 });
 

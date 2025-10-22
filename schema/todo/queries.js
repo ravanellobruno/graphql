@@ -4,7 +4,7 @@ const {
 
 const TodoType = require("./type");
 const Todo = require("../../models/todo");
-const requireAuth = require("../../utils/auth");
+const requireAuth = require("../../utils/require_auth");
 
 module.exports = {
   todosByUser: {
