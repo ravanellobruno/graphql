@@ -6,10 +6,8 @@ const { verifyToken } = require("./utils/token");
 const expressPlayground = require("graphql-playground-middleware-express").default;
 
 const app = express();
-const port = 4000;
-const mongoPort = 27017;
 
-mongoose.connect(`mongodb://localhost:${mongoPort}/graphql`, {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -39,7 +37,7 @@ app.use(
 
 app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
 
-app.listen(port, () => {
-  // console.log(`Server running at http://localhost:${port}/graphql`);
-  console.log(`GraphQL Playground at http://localhost:${port}/playground`);
+app.listen(process.env.PORT, () => {
+  // console.log(`Server running at http://localhost:${process.env.PORT}/graphql`);
+  console.log(`GraphQL Playground at http://localhost:${process.env.PORT}/playground`);
 });
