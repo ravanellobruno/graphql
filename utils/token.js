@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-const SECRET = "12345";
-const EXPIRES_IN = "1h";
+const secret = process.env.JWT_SECRET;
+const expiresIn = process.env.JWT_EXPIRES_IN;
 
 function generateToken(user) {
   const data = {
@@ -10,12 +10,12 @@ function generateToken(user) {
     name: user.name,
   };
 
-  return jwt.sign(data, SECRET, { expiresIn: EXPIRES_IN });
+  return jwt.sign(data, secret, { expiresIn });
 }
 
 function verifyToken(token) {
   try {
-    return jwt.verify(token, SECRET);
+    return jwt.verify(token, secret);
   } catch (err) {
     throw new Error("Invalid or expired token");
   }
