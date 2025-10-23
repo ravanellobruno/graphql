@@ -7,12 +7,14 @@ services:
       - "4000:4000"
     environment:
       - MONGO_URI=mongodb://mongo:27017/graphql
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - PORT=4000
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
     depends_on:
       - mongo
+      - redis
 
   mongo:
     image: mongo:7.0
@@ -23,5 +25,15 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  redis:
+    image: redis:7.4
+    container_name: graphql-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
   mongo_data:
+  redis_data:

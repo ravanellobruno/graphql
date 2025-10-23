@@ -4,6 +4,7 @@ const schema = require("./schema");
 const connectDB = require("./config/db");
 const authenticate = require("./middleware/auth");
 const expressPlayground = require("graphql-playground-middleware-express").default;
+const redis = require("./config/redis");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -16,7 +17,7 @@ app.use("/graphql", graphqlHTTP((req) => {
   return {
     schema,
     graphiql: false,
-    context: { user },
+    context: { user, redis },
   };
 }));
 

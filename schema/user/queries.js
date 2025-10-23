@@ -7,13 +7,14 @@ const {
 
 const UserType = require("./type");
 const User = require("../../models/user");
+const { getCachedUser } = require("../../utils/redis_user");
 
 module.exports = {
   user: {
     type: UserType,
     args: { id: { type: GraphQLID } },
-    resolve(_, args) {
-      return User.findById(args.id);
+    async resolve(_, args) {
+      return await getCachedUser(args.id);
     },
   },
   users: {

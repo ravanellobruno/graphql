@@ -4,7 +4,6 @@ const {
   GraphQLInt,
   GraphQLNonNull
 } = require("graphql");
-
 const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 
@@ -12,6 +11,7 @@ const UserType = require("./type");
 const User = require("../../models/user");
 const AuthType = require("../auth/type.js");
 const { generateToken } = require("../../utils/token.js");
+const { cacheUser, deleteCachedUser } = require("../../utils/redis_user");
 
 module.exports = {
   createUser: {
@@ -24,7 +24,7 @@ module.exports = {
     },
     async resolve(_, args) {
       const hash = await bcrypt.hash(args.password, SALT_ROUNDS);
-      
+
       const user = new User({
         name: args.name,
         email: args.email,
@@ -32,7 +32,10 @@ module.exports = {
         password: hash,
       });
 
-      return user.save();
+      const savedUser = await user.save();
+      await cacheUser(savedUser);
+
+      return savedUser;
     },
   },
   updateUser: {
@@ -53,20 +56,29 @@ module.exports = {
         args.password = await bcrypt.hash(args.password, SALT_ROUNDS);
       }
 
-      return User.findByIdAndUpdate(args.id, { $set: args }, { new: true });
+      const updatedUser = await User.findByIdAndUpdate(
+        args.id,
+        { $set: args },
+        { new: true }
+      );
+
+      await cacheUser(updatedUser);
+      
+      return updatedUser;
     },
   },
   deleteUser: {
     type: UserType,
-    args: {
-      id: { type: new GraphQLNonNull(GraphQLID) },
-    },
+    args: { id: { type: new GraphQLNonNull(GraphQLID) } },
     async resolve(_, args) {
       const user = await User.findById(args.id);
 
       if (!user) throw new Error("User not found");
 
-      return User.findByIdAndDelete(args.id);
+      const deletedUser = await User.findByIdAndDelete(args.id);
+      await deleteCachedUser(args.id);
+
+      return deletedUser;
     },
   },
   login: {
@@ -85,8 +97,9 @@ module.exports = {
       if (!isValid) throw new Error("Invalid password");
 
       const token = generateToken(user);
-      
+      await cacheUser(user);
+
       return { token, user };
     },
-  }
+  },
 };
