@@ -2,6 +2,7 @@ const {
   GraphQLString,
   GraphQLID,
   GraphQLNonNull,
+  GraphQLBoolean,
 } = require("graphql");
 
 const TodoType = require("./type");
@@ -20,6 +21,7 @@ module.exports = {
         userId: user.id,
         title: args.title,
         description: args.description,
+        done: false,
       });
 
       return todo.save();
@@ -31,10 +33,11 @@ module.exports = {
       id: { type: new GraphQLNonNull(GraphQLID) },
       title: { type: GraphQLString },
       description: { type: GraphQLString },
+      done: { type: GraphQLBoolean },
     },
     resolve: requireAuth(async (_, args, { user }) => {
       const todo = await Todo.findById(args.id);
-      
+
       if (!todo) throw new Error("Todo not found");
 
       if (todo.userId.toString() !== user.id) {

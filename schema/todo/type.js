@@ -2,6 +2,7 @@ const {
   GraphQLObjectType,
   GraphQLString,
   GraphQLID,
+  GraphQLBoolean,
 } = require("graphql");
 
 const TodoType = new GraphQLObjectType({
@@ -11,6 +12,7 @@ const TodoType = new GraphQLObjectType({
     userId: { type: GraphQLID },
     title: { type: GraphQLString },
     description: { type: GraphQLString },
+    done: { type: GraphQLBoolean },
   }),
 });
 
