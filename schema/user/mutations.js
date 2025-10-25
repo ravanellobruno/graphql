@@ -32,10 +32,7 @@ module.exports = {
         password: hash,
       });
 
-      const savedUser = await user.save();
-      await cacheUser(savedUser);
-
-      return savedUser;
+      return await user.save();
     },
   },
   updateUser: {

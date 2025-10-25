@@ -21,7 +21,6 @@ services:
   mongo:
     image: mongo:7.0
     container_name: graphql-mongo
-    restart: always
     ports:
       - "27017:27017"
     volumes:
@@ -30,7 +29,6 @@ services:
   redis:
     image: redis:7.4
     container_name: graphql-redis
-    restart: always
     ports:
       - "6379:6379"
     volumes:
